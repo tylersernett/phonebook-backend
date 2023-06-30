@@ -1,7 +1,7 @@
 //hour used: 1.5
 const express = require('express')
 const app = express()
-const phonebook = require('./persons.json')
+let phonebook = require('./persons.json')
 
 const PORT = 3001
 app.listen(PORT)
@@ -29,4 +29,11 @@ app.get('/api/persons/:id', (request, response) => {
   } else {
     response.status(404).end();
   }
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id);
+  phonebook = phonebook.filter(person => person.id !== id);
+  console.log(phonebook)
+  response.status(204).end()
 })
