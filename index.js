@@ -11,6 +11,8 @@ app.use(cors())
 app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postJSON'));
 morgan.token('postJSON', function (req, res) { return JSON.stringify(req.body) })
+app.use(express.static('dist'))
+
 
 const PORT = 3001
 app.listen(PORT)
