@@ -1,5 +1,7 @@
 //hour used: 1.5
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 let phonebook = require('./persons.json')
 
@@ -7,7 +9,9 @@ const PORT = 3001
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
 
+//MIDDLEWARE
 app.use(express.json())
+app.use(morgan('tiny'));
 
 app.get('/api/persons', (request, response) => {
   response.send(phonebook)
