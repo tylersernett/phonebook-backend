@@ -1,18 +1,21 @@
-//hour used: 1.5
+//hour used: 3
+const cors = require('cors')
 const express = require('express')
 const morgan = require('morgan')
 
 const app = express()
 let phonebook = require('./persons.json')
 
+//MIDDLEWARE
+app.use(cors())
+app.use(express.json())
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postJSON'));
+morgan.token('postJSON', function (req, res) { return JSON.stringify(req.body) })
+
 const PORT = 3001
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
 
-//MIDDLEWARE
-app.use(express.json())
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postJSON'));
-morgan.token('postJSON', function (req, res) { return JSON.stringify(req.body) })
 
 app.get('/api/persons', (request, response) => {
   response.send(phonebook)
@@ -81,3 +84,11 @@ app.delete('/api/persons/:id', (request, response) => {
   console.log(phonebook)
   response.status(204).end()
 })
+
+// app.put('/api/persons/:id', (request, response) => {
+//   console.log(request.body)
+//   const id = Number(request.params.id);
+//   const personToUpdate = phonebook.find(person => person.id === id);
+//   console.log(personToUpdate)
+//   response.status(204).end()
+// })
