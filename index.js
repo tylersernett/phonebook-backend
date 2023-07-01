@@ -112,6 +112,23 @@ app.delete('/api/persons/:id', (request, response, next) => {
 //   response.status(204).end()
 // })
 
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  //don't use mongoose schema: just regular person object
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
+})
+
+
 //404 and 400 handling \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 const unknownEndpoint = (request, response) => {
