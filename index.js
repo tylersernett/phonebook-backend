@@ -1,10 +1,12 @@
-//hour used: 3
+//hour used: 5.5
+require('dotenv').config()
 const cors = require('cors')
 const express = require('express')
 const morgan = require('morgan')
-
+const Person = require('./models/person')
 const app = express()
 let phonebook = require('./persons.json')
+const person = require('./models/person')
 
 //MIDDLEWARE
 app.use(cors())
@@ -14,29 +16,32 @@ morgan.token('postJSON', function (req, res) { return JSON.stringify(req.body) }
 app.use(express.static('dist'))
 
 
-const PORT = 3001
-app.listen(PORT)
-console.log(`Server running on port ${PORT}`)
+const PORT = process.env.PORT
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
 
 
 app.get('/api/persons', (request, response) => {
-  response.send(phonebook)
+  Person.find({}).then(people => {
+    response.json(people)
+  })
 })
 
 app.get('/info', (request, response) => {
   const timestamp = new Date().toString();
-  const entryCount = phonebook.length;
-  response.send(
-    `Phonebook has info for ${entryCount} people <br/> ${timestamp}`
-  );
+  Person.countDocuments({}).then(count =>
+    response.send(
+      `Phonebook has info for ${count} people <br/> ${timestamp}`
+    ))
 })
 
-const generateId = () => {
-  const maxId = phonebook.length > 0
-    ? Math.max(...phonebook.map(n => n.id))
-    : 0
-  return maxId + 1
-}
+// const generateId = () => {
+//   const maxId = phonebook.length > 0
+//     ? Math.max(...phonebook.map(n => n.id))
+//     : 0
+//   return maxId + 1
+// }
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
@@ -52,32 +57,37 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  const existingPerson = phonebook.find(person=>person.name===body.name)
+  const existingPerson = phonebook.find(person => person.name === body.name)
   if (existingPerson) {
     return response.status(400).json({
       error: 'name must be unique'
     })
   }
 
-  const person = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  }
+    // id: generateId(),
+  })
 
-  phonebook = phonebook.concat(person)
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 
-  response.json(person)
+  // phonebook = phonebook.concat(person)
+  // response.json(person)
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id);
-  const person = phonebook.find(person => person.id === id);
-  if (person) {
-    response.send(person)
-  } else {
-    response.status(404).end();
-  }
+  Person.findById(request.params.id).then(person => {
+    response.json(person)
+  })
+  // const person = phonebook.find(person => person.id === id);
+  // if (person) {
+  //   response.send(person)
+  // } else {
+  //   response.status(404).end();
+  // }
 })
 
 app.delete('/api/persons/:id', (request, response) => {
