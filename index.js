@@ -5,7 +5,6 @@ const express = require('express')
 const morgan = require('morgan')
 const Person = require('./models/person')
 const app = express()
-const person = require('./models/person')
 
 //MIDDLEWARE
 app.use(cors())
@@ -20,17 +19,19 @@ app.listen(PORT, () => {
 })
 
 app.get('/api/persons', (request, response) => {
-  Person.find({}).then(people => {
-    response.json(people)
-  })
+  Person.find({})
+    .then(people => response.json(people))
+    .catch(error => next(error))
 })
 
 app.get('/info', (request, response) => {
   const timestamp = new Date().toString();
-  Person.countDocuments({}).then(count =>
-    response.send(
-      `Phonebook has info for ${count} people <br/> ${timestamp}`
-    ))
+  Person.countDocuments({})
+    .then(count =>
+      response.send(
+        `Phonebook has info for ${count} people <br/> ${timestamp}`
+      ))
+    .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response) => {
@@ -52,9 +53,9 @@ app.post('/api/persons', (request, response) => {
     number: body.number,
   })
 
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+  person.save()
+    .then(savedPerson => response.json(savedPerson))
+    .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -71,9 +72,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
-    .then(result => {
-      response.status(204).end()
-    })
+    .then(result => response.status(204).end())
     .catch(error => next(error))
 })
 
@@ -87,9 +86,7 @@ app.put('/api/persons/:id', (request, response, next) => {
   }
 
   Person.findByIdAndUpdate(request.params.id, person, { new: true })
-    .then(updatedPerson => {
-      response.json(updatedPerson)
-    })
+    .then(updatedPerson => response.json(updatedPerson))
     .catch(error => next(error))
 })
 
