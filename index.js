@@ -74,9 +74,15 @@ app.put('/api/persons/:id', (request, response, next) => {
     number: body.number,
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
-    .then(updatedPerson => response.json(updatedPerson))
-    .catch(error => next(error))
+  Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
+    .then(updatedPerson => {
+      if (updatedPerson) {
+        response.json(updatedPerson);
+      } else {
+        response.status(404).json({ error: `${person.name} not found on server` });
+      }
+    })
+    .catch(error => next(error));
 })
 
 
