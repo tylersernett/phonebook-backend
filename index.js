@@ -10,7 +10,7 @@ const app = express()
 app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postJSON'));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postJSON'))
 morgan.token('postJSON', function (req, res) { return JSON.stringify(req.body) })
 
 const PORT = process.env.PORT
@@ -18,14 +18,14 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
   Person.find({})
     .then(people => response.json(people))
     .catch(error => next(error))
 })
 
-app.get('/info', (request, response) => {
-  const timestamp = new Date().toString();
+app.get('/info', (request, response, next) => {
+  const timestamp = new Date().toString()
   Person.countDocuments({})
     .then(count =>
       response.send(
@@ -77,12 +77,12 @@ app.put('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
     .then(updatedPerson => {
       if (updatedPerson) {
-        response.json(updatedPerson);
+        response.json(updatedPerson)
       } else {
-        response.status(404).json({ error: `${person.name} not found on server` });
+        response.status(404).json({ error: `${person.name} not found on server` })
       }
     })
-    .catch(error => next(error));
+    .catch(error => next(error))
 })
 
 
